@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-pomodoro.helloWorld",
-        "title": "Hello World"
+        "command": "pomodoro.toggle",
+        "title": "pomodoro"
       }
     ]
   },

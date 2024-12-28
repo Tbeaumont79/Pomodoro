@@ -1,26 +1,56 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  const pomodoroTime = 25 * 60;
+  const breakTime = 5 * 60;
+  let remainingTime = pomodoroTime;
+  let isPomodoro = true;
+  let interval: NodeJS.Timeout | undefined;
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vscode-pomodoro" is now active!');
+  const statusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
+  statusBar.text = `$(clock) Pomodoro: 25:00`;
+  statusBar.tooltip = "toggle pomodoro";
+  statusBar.command = "pomodoro.toggle";
+  statusBar.show();
+  const toggleCommand = vscode.commands.registerCommand(
+    "pomodoro.toggle",
+    () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = undefined;
+        statusBar.text = `$(clock) Pomodoro: 25:00`;
+        remainingTime = pomodoroTime;
+      } else {
+        startTimer();
+      }
+    }
+  );
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('vscode-pomodoro.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from vscode-pomodoro!');
-	});
+  const startTimer = () => {
+    interval = setInterval(() => {
+      if (remainingTime > 0) {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        statusBar.text = `$(clock) ${
+          isPomodoro ? "Pomodoro" : "Pause"
+        }: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+        remainingTime--;
+      } else {
+        vscode.window.showInformationMessage(
+          isPomodoro
+            ? "Pomodoro terminé ! Prenez une pause."
+            : "Pause terminée ! Reprenez le travail."
+        );
+        isPomodoro = !isPomodoro;
+        remainingTime = isPomodoro ? pomodoroTime : breakTime;
+      }
+    }, 1000);
+  };
 
-	context.subscriptions.push(disposable);
+  context.subscriptions.push(statusBar, toggleCommand);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
