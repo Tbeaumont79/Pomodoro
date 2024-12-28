@@ -1,10 +1,17 @@
 import * as vscode from "vscode";
-
+import * as path from "path";
+import { exec } from "child_process";
 export function activate(context: vscode.ExtensionContext) {
   const pomodoroTime = 25 * 60;
   const breakTime = 5 * 60;
   let remainingTime = pomodoroTime;
   let isPomodoro = true;
+  const startQuestSoundPath = path.join(__dirname, "sounds/", "quest_add.mp3");
+  const endQuestSoundPath = path.join(
+    __dirname,
+    "sounds/",
+    "quest_complete.mp3"
+  );
   let interval: NodeJS.Timeout | undefined;
 
   const statusBar = vscode.window.createStatusBarItem(
@@ -24,6 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
         statusBar.text = `$(clock) Pomodoro: 25:00`;
         remainingTime = pomodoroTime;
       } else {
+        soundPlayer(startQuestSoundPath);
         startTimer();
       }
     }
@@ -39,6 +47,10 @@ export function activate(context: vscode.ExtensionContext) {
         }: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
         remainingTime--;
       } else {
+        if (isPomodoro) {
+          soundPlayer(endQuestSoundPath);
+        }
+
         vscode.window.showInformationMessage(
           isPomodoro
             ? "Pomodoro terminé ! Prenez une pause."
@@ -49,7 +61,11 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }, 1000);
   };
-
+  const soundPlayer = (soundPath: string) => {
+    exec(`sox ${soundPath} -d`, (error) => {
+      vscode.window.showErrorMessage(error ? error.message : "");
+    });
+  };
   context.subscriptions.push(statusBar, toggleCommand);
 }
 
