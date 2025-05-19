@@ -15,7 +15,7 @@
     "commands": [
       {
         "command": "pomodoro.toggle",
-        "title": "pomodoro"
+        "title": "Toggle Pomodoro Timer"
       }
     ]
   },

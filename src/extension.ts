@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import { exec } from "child_process";
 
 const START_SOUND =
@@ -13,18 +12,18 @@ export function activate(context: vscode.ExtensionContext) {
   let isPomodoro = true;
 
   let interval: NodeJS.Timeout | undefined;
-
   const statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100
   );
-  statusBar.text = `$(clock) Pomodoro: 25:00`;
-  statusBar.tooltip = "toggle pomodoro";
-  statusBar.command = "pomodoro.toggle";
-  statusBar.show();
   const toggleCommand = vscode.commands.registerCommand(
     "pomodoro.toggle",
     () => {
+      statusBar.text = `$(clock) Pomodoro: 25:00`;
+      statusBar.tooltip = "toggle pomodoro";
+      statusBar.command = "pomodoro.toggle";
+      statusBar.show();
+
       if (interval) {
         clearInterval(interval);
         interval = undefined;
@@ -62,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
     }, 1000);
   };
   const soundPlayer = (soundPath: string) => {
-    exec(`sox ${soundPath} -d`, (error) => {
+    exec(`play ${soundPath}`, (error) => {
       vscode.window.showErrorMessage(error ? error.message : "");
     });
   };
